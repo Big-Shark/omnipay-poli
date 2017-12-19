@@ -52,8 +52,18 @@ class PurchaseRequest extends AbstractRequest
         $data['MerchantData'] = $this->getTransactionId();
         $data['MerchantDateTime'] = date('Y-m-d\TH:i:s');
         $data['MerchantHomePageURL'] = $this->getCancelUrl();
-        $data['MerchantReference'] = $this->getCombinedMerchantRef();
-        $data['MerchantReferenceFormat'] = 1;
+        if($this->parameters->has('merchantReference')) {
+            $data['MerchantReference'] = $this->parameters->get('merchantReference');
+        } else {
+            $data['MerchantReference'] = $this->getCombinedMerchantRef();
+        }
+        if($data['CurrencyCode'] === 'NZD') {
+            if($this->parameters->has('MerchantReferenceFormat')) {
+                $data['MerchantReferenceFormat'] = $this->parameters->get('MerchantReferenceFormat');
+            } else {
+                $data['MerchantReferenceFormat'] = 1;
+            }
+        }
         $data['NotificationURL'] = $this->getNotifyUrl();
         $data['SuccessURL'] = $this->getReturnUrl();
         $data['Timeout'] = 0;
