@@ -33,6 +33,16 @@ class PurchaseRequest extends AbstractRequest
         return $this->setParameter('authenticationCode', $value);
     }
 
+    public function setMerchantReference($value)
+    {
+        return $this->setParameter('merchantReference', $value);
+    }
+
+    public function setMerchantReferenceFormat($value)
+    {
+        return $this->setParameter('merchantReferenceFormat', $value);
+    }
+
     public function getData()
     {
         $this->validate(
@@ -52,17 +62,9 @@ class PurchaseRequest extends AbstractRequest
         $data['MerchantData'] = $this->getTransactionId();
         $data['MerchantDateTime'] = date('Y-m-d\TH:i:s');
         $data['MerchantHomePageURL'] = $this->getCancelUrl();
-        if($this->parameters->has('merchantReference')) {
-            $data['MerchantReference'] = $this->parameters->get('merchantReference');
-        } else {
-            $data['MerchantReference'] = $this->getCombinedMerchantRef();
-        }
+        $data['MerchantReference'] = $this->parameters->get('merchantReference', $this->getCombinedMerchantRef());
         if($data['CurrencyCode'] === 'NZD') {
-            if($this->parameters->has('MerchantReferenceFormat')) {
-                $data['MerchantReferenceFormat'] = $this->parameters->get('MerchantReferenceFormat');
-            } else {
-                $data['MerchantReferenceFormat'] = 1;
-            }
+            $data['MerchantReferenceFormat'] = $this->parameters->get('merchantReferenceFormat', 1);
         }
         $data['NotificationURL'] = $this->getNotifyUrl();
         $data['SuccessURL'] = $this->getReturnUrl();
@@ -109,7 +111,6 @@ class PurchaseRequest extends AbstractRequest
         $auth = base64_encode($merchantCode.":".$authenticationCode); //'S61xxxxx:AuthCode123');
         unset($data['MerchantCode'], $data['AuthenticationCode']);
 
-        //$postdata = $this->packageData($data);
         $postdata = json_encode($data);
         $httpRequest = $this->httpClient->post(
             $this->endpoint,
@@ -121,26 +122,5 @@ class PurchaseRequest extends AbstractRequest
         );
         $httpResponse = $httpRequest->send();
         return $this->response = new PurchaseResponse($this, $httpResponse->getBody());
-    }
-
-    protected function packageData($data)
-    {
-        $authenticationcode = $data['AuthenticationCode'];
-        unset($data['AuthenticationCode']);
-        $fields = "";
-        foreach ($data as $field => $value) {
-            $fields .= str_repeat(" ", 24)."<dco:$field>$value</dco:$field>\n";
-        }
-        $namespace = "http://schemas.datacontract.org/2004/07/Centricom.POLi.Services.MerchantAPI.Contracts";
-        $i_namespace = "http://www.w3.org/2001/XMLSchema-instance";
-        $dco_namespace = "http://schemas.datacontract.org/2004/07/Centricom.POLi.Services.MerchantAPI.DCO";
-
-        return '<?xml version="1.0" encoding="utf-8" ?>
-                <InitiateTransactionRequest xmlns="'.$namespace.'" xmlns:i="'.$i_namespace.'">
-                    <AuthenticationCode>'. $authenticationcode.'</AuthenticationCode>
-                    <Transaction xmlns:dco="'.$dco_namespace.'">'
-                        .$fields.
-                    '</Transaction>
-                </InitiateTransactionRequest>';
     }
 }
