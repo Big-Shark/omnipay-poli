@@ -43,6 +43,11 @@ class CompletePurchaseRequest extends PurchaseRequest
         return $data;
     }
 
+    public function getToken()
+    {
+        return $this->getParameter('token');
+    }
+
     public function send()
     {
         return $this->sendData($this->getData());
@@ -50,16 +55,17 @@ class CompletePurchaseRequest extends PurchaseRequest
 
     public function sendData($data)
     {
-        $request = $this->httpClient->get($this->endpoint)
-            ->setAuth($this->getMerchantCode(), $this->getAuthenticationCode());
-        $request->getQuery()->replace($data);
-        $httpResponse = $request->send();
+        $auth = base64_encode($this->getMerchantCode().":".$this->getAuthenticationCode());
+        $httpResponse = $this->httpClient->request(
+            'GET',
+            $this->endpoint.'?'.http_build_query($data),
+            [
+                'Authorization' => 'Basic '.$auth,
+                'Content-Type' => 'application/json',
+            ],
+            json_encode($data)
+        );
 
-        return $this->response = new CompletePurchaseResponse($this, $httpResponse->getBody());
-    }
-
-    public function getToken()
-    {
-        return $this->getParameter('token');
+        return $this->response = new CompletePurchaseResponse($this, $httpResponse->getBody()->getContents());
     }
 }

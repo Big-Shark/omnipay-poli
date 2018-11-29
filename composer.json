@@ -1,5 +1,5 @@
 {
-    "name": "burnbright/omnipay-poli",
+    "name": "Big-Shark/omnipay-poli",
     "type": "library",
     "description": "POLi driver for the Omnipay payment processing library",
     "keywords": [
@@ -10,18 +10,12 @@
         "POLi",
         "payment"
     ],
-    "homepage": "https://github.com/burnbright/omnipay-poli",
+    "homepage": "https://github.com/Big-Shark/omnipay-poli",
     "license": "MIT",
     "authors": [
         {
-            "name": "Jeremy Shipman",
-            "email": "jeremy@burnbright.net",
-            "homepage": "http://jeremyshipman.com"
-        },
-        {
-            "name": "Sid Bachtiar",
-            "email": "sid.bachtiar@gmail.com",
-            "homepage": "http://onlinesid.com"
+            "name": "Maxim",
+            "email": "bigshark666@gmail.com"
         }
     ],
     "autoload": {

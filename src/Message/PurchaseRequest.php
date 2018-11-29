@@ -6,7 +6,7 @@ use Omnipay\Common\Message\AbstractRequest;
 
 /**
  * Poli Purchase Request
- * 
+ *
  * @link http://www.polipaymentdeveloper.com/doku.php?id=initiate
  */
 class PurchaseRequest extends AbstractRequest
@@ -106,21 +106,17 @@ class PurchaseRequest extends AbstractRequest
 
     public function sendData($data)
     {
-        $merchantCode = $this->getMerchantCode();
-        $authenticationCode = $this->getAuthenticationCode();
-        $auth = base64_encode($merchantCode.":".$authenticationCode); //'S61xxxxx:AuthCode123');
-        unset($data['MerchantCode'], $data['AuthenticationCode']);
-
-        $postdata = json_encode($data);
-        $httpRequest = $this->httpClient->post(
+        $auth = base64_encode($this->getMerchantCode().":".$this->getAuthenticationCode());
+        $httpResponse = $this->httpClient->request(
+            'POST',
             $this->endpoint,
-            array(
-                'Content-Type'=>'application/json',
+            [
                 'Authorization' => 'Basic '.$auth,
-            ),
-            $postdata
+                'Content-Type' => 'application/json',
+            ],
+            json_encode($data)
         );
-        $httpResponse = $httpRequest->send();
-        return $this->response = new PurchaseResponse($this, $httpResponse->getBody());
+
+        return $this->response = new PurchaseResponse($this, $httpResponse->getBody()->getContents());
     }
 }
